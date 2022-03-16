@@ -1,0 +1,446 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+
+html {
+
+
+
+    position: relative;
+    min-height: 100%;
+
+}
+
+body {
+    background-color: #F3FFFD;
+
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+min-height: 100%;
+height: 100%;
+margin-bottom: 100px;
+
+
+}
+
+
+
+
+
+
+.wrapper{
+    min-height: 100%;
+
+
+
+}
+.navbar-toggler {
+
+    border: 0;
+
+}
+.navbar{
+    width: 100%;
+}
+.navbar .nav-item a {
+  
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 22px;
+    letter-spacing: 0.2px;
+    text-align: start;
+color: black !important;
+
+}
+
+.nav-item  a:hover {
+    color: #00CCA6 !important;
+
+}
+
+
+.navbar-light .navbar-brand{
+    color: #252B42;;
+
+}
+
+  #main-content h1 {
+
+
+    font-style: normal;
+    font-weight: bold;
+    font-size: 58px;
+    line-height: 80px;
+
+
+    letter-spacing: 0.2px;
+
+    color: white;
+
+
+
+}
+
+ #main-content h4 {
+
+
+    font-style: normal;
+    font-weight: normal;
+    font-size: 28px;
+
+
+    letter-spacing: 0.2px;
+    
+    color: white;
+
+
+
+}
+
+
+
+
+
+#main-block h2 {
+
+    font-weight: bold;
+    font-style: normal;
+    font-size: 40px;
+    line-height: 57px;
+    letter-spacing: 0.2px;
+    
+
+}
+
+
+
+#main-block #main-content{
+    background-image:url(../static/img/main-block-bg.png);
+    background-repeat:no-repeat;
+    background-size:contain;
+    background-position:center center;
+    
+
+}
+#main-block #main-content .card {
+    width: 20rem;
+    height: fit-content;
+    margin: 20px;
+
+
+}
+
+#main-block #main-content .card img {
+    width: 108px;
+    height: 108px;
+    margin: 20px auto;
+
+}
+#main-block #main-content .card button{
+  width: 100%;
+
+  
+}
+#main-block #main-content .card button a{
+    text-decoration: none;
+    color: white;
+  
+  }
+
+#main-block #main-content h5 {
+
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0.1px;
+    color: #252B42;
+    text-align: center;
+}
+
+#main-block #main-content p {
+
+    margin: 0;
+
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.2px;
+    color: black;
+    text-align: center;
+}
+
+#main-block #main-content p::before {
+    padding: 10px;
+    content: "•"
+}
+
+#for-clients {
+
+    height: 465px;
+    background-color: #252B42;
+    margin-top: 40px;
+
+}
+
+#for-clients h2 {
+    margin-top: 20px;
+    color: white;
+
+    font-weight: bold;
+    font-size: 40px;
+    line-height: 57px;
+    letter-spacing: 0.2px;
+    margin-left: 30px;
+
+
+
+}
+
+.features-list h6::before {
+    content: url(../static/img/done.svg);
+    padding: 10px;
+
+}
+
+.features-list h6 {
+    color: white;
+
+    font-weight: 600;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 24px;
+    letter-spacing: 0.4px;
+    margin: 20px;
+
+
+}
+
+
+#about-us {
+
+
+
+
+    height: 100%;
+    margin-top: 50px;
+background-color: #252B42;
+}
+
+
+
+#about-us h2 {
+    color: white;
+    margin-top: 50px;
+    margin-bottom: 50px;
+
+    font-weight: bold;
+    font-style: normal;
+    font-size: 40px;
+    line-height: 57px;
+    letter-spacing: 0.2px;
+
+}
+
+#about-us p {
+
+    color: white;
+    margin-top: 50px;
+    margin-bottom: 50px;
+
+    font-weight: 500;
+    font-style: normal;
+    font-size: 14x;
+    line-height: 20px;
+    letter-spacing: 0.2px;
+
+}
+
+.contact-form {
+
+
+   
+    background-color: white;
+
+  
+
+
+}
+
+.contact-form h3 {
+    padding: 50px;
+    color: #252B42;
+
+
+
+    font-weight: bold;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 32px;
+    letter-spacing: 0.1px;
+}
+
+
+.contact-form form {
+    width:100%;
+    color: #252B42;
+}
+
+.contact-form form label {
+
+    font-weight: 500;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 24px;
+    letter-spacing: 0.2px;
+}
+
+.contact-form form input {
+    background-color:#DDDDDD;
+    color:black
+}
+.contact-form .btn{
+  
+    width:100%;
+
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 22px;
+    letter-spacing: 0.2px;
+
+
+}
+
+.contact-form img{
+   
+padding: 40px 40px;
+}
+.footer{
+
+    position: absolute;
+    bottom: 0;
+    left:0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 100px;
+    background-color: #f5f5f5;
+    padding-left: 15px;
+    padding-right: 15px;
+   
+}
+.footer p{
+padding: 25px 25px;
+
+font-size: 14px;
+font-weight: normal;
+line-height: 24px;
+letter-spacing: 0.2px;
+color: #737373;
+}
+.contacts-block{
+    background-color:white;
+    height:auto;
+ 
+}
+
+.phone::before{
+    content: url(../static/img/bx_bx-phone.svg);
+    padding:20px;
+    margin-top: 10px;
+}
+
+.map::before{
+    content: url(../static/img/bx_bx-map.svg);
+    padding:20px;
+    margin-top: 10px;
+}
+.contacts-block h5{
+    color: #252B42;
+    font-size: 25px;
+    padding: 10px;
+}
+
+.footer img{
+    padding: 25px 25px;
+    }
+@media (max-width:1200px){
+ body{
+    margin-bottom: 220px;
+ }
+  #main-content h1 {
+
+
+       
+        font-size:28px;
+        line-height: 35px;
+     
+     
+        
+
+    
+    
+    
+    }
+  
+ #main-content h4 {
+    
+        font-size: 16px;
+        line-height: 20px;
+        padding-top: 0px;
+    
+    
+    }
+    
+header .card h3 {
+    font-size: 20px;
+    line-height: 35px;
+}
+#main-block h2 {
+    font-size: 28px;
+    line-height: 35px;
+}
+#main-block #main-content .card {
+    width: 15rem;
+    height: auto;
+    margin: 20px;
+
+
+}
+#main-block #main-content h5{
+    font-size:16px;
+    line-height: 35px;
+    
+}#main-block #main-content p{
+    font-size:14px;
+    line-height: 35px;
+
+    
+}
+#for-clients h2{     font-size: 25px;
+    line-height: 35px;}
+.features-list h6{
+    font-size: 16px;
+    line-height: 35px;
+}
+#about-us h6{
+    font-size: 16px;
+    line-height: 35px;
+}
+.contact-form h3{
+    font-size: 18px;
+    line-height: 35px;
+}
+h1{
+    font-size: 25px;
+}
+.footer{
+    height: 220px;
+}
+}
+
+
+
+
+
+
