@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}
+Профіль
+{%  endblock  %}
+
+{% block body %}
+
+        <div class="container-fluid">
+            <h1 class=" mt-4 ">Профіль:</h1>
+            
+         <div class="card mb-4" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">{{current_user.pib}}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Ваш електроний адрес:  {{current_user.email}}</h6>
+    <p class="card-text"><strong>Ваш номер телефона:</strong> {{current_user.phone_number}}</p>
+        <p class="card-text"><strong>Дата реєстрацій</strong> {{current_user.ts_registry}}</p>
+        
+    
+    
+    <a href="#" class="card-link">Ссылка карточки</a>
+    <a href="#" class="card-link">Другая ссылка</a>
+  </div>
+</div>
+        
+        </div>
+        </div>
+
+</div>
+{% endblock %}

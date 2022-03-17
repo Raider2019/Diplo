@@ -49,9 +49,19 @@
           <a class="nav-link" href="{{ url_for('register')}}"> Реєстрація</a>
         </li>
         {% else %}
+        <div class="dropdown">
+  <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">Ваш аккаунт
+  <span class="caret"></span></button>
+  <ul class="dropdown-menu">
+  <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('dashboard')}}"> Профіль</a>
+        </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('logout')}}">Вийти</a>
         </li>
+  </ul>
+</div>
+      
         {% endif %}
   
     </div>

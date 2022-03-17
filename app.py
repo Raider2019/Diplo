@@ -1,5 +1,6 @@
 from flask import Flask, render_template,redirect,url_for,request, flash
 from flask_sqlalchemy import SQLAlchemy
+import phonenumbers
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import IntegerField, StringField,EmailField,DateField,DecimalField, SelectField,TextAreaField,SubmitField,PasswordField,BooleanField
@@ -96,14 +97,23 @@ def load_user(id_users):
 class FeedbackForm(FlaskForm):
     pib = StringField('Ваше повне ім`я',validators=[DataRequired()])
     email = EmailField('Ваша електрона адреа',validators=[DataRequired(),Email()])
-    phone_number = StringField('Ваш номер телефона',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
+    phone= StringField('Ваш номер телефона',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
     comments = TextAreaField("Ваш коментар",validators=[DataRequired(),length( max=255,message='Кометар великий')])
     submit = SubmitField('Send')
+    
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data)
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
 
 class LoginForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired()])
     password = PasswordField('Password',validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
+       
 
 
     
@@ -118,7 +128,7 @@ def index():
     if form.validate_on_submit():
         pib = form.pib.data
         email = form.pib.data
-        phone_number = form.phone_number.data
+        phone_number = form.phone.data
         comments = form.comments.data
         feedback = Feedback(pib= pib,email = email, phone_number = phone_number, comments = comments)
         flash("Дані відпралено. Ми зв'язимся з вами.")
@@ -156,13 +166,25 @@ class RegistrationForm(FlaskForm):
     phone =StringField('Ваш номер телефона', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(),length(min=8, max=16)])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
-        
-          
+    
     def validate_email(self,email):
         user = Users.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email address.')
             
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data)
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
+
+        
+
+
+
+                
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -188,6 +210,10 @@ def contacts():
 def price():
     return render_template("price.html")
     
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template("dashboard.html")    
 
 
 
