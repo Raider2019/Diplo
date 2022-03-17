@@ -18,11 +18,22 @@
         
     
     
-    <a href="#" class="card-link">Ссылка карточки</a>
-    <a href="#" class="card-link">Другая ссылка</a>
+    
   </div>
 </div>
-        
+        <div class="card mb-4" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">Змінити дані:</h5>
+     <form method="post" action="/dashboard">
+                {{form.hidden_tag()}}
+                {{wtf.form_field(form.email)}}
+                {{wtf.form_field(form.pib,plahe)}}
+                {{wtf.form_field(form.phone)}}
+                
+                
+	       
+                <button type="submit" class="btn btn-success">Змінити</button>
+            </form>
         </div>
         </div>
 

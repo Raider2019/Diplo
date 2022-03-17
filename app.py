@@ -35,7 +35,7 @@ class Users(UserMixin,db.Model):
     def __repr__(self):
         return '<Name %r>' % self.ts_registry
     
-
+   
 
 
 
@@ -96,7 +96,7 @@ def load_user(id_users):
 #Форма
 class FeedbackForm(FlaskForm):
     pib = StringField('Ваше повне ім`я',validators=[DataRequired()])
-    email = EmailField('Ваша електрона адреа',validators=[DataRequired(),Email()])
+    email = EmailField('Ваша електрона адреса',validators=[DataRequired(),Email()])
     phone= StringField('Ваш номер телефона',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
     comments = TextAreaField("Ваш коментар",validators=[DataRequired(),length( max=255,message='Кометар великий')])
     submit = SubmitField('Send')
@@ -113,8 +113,26 @@ class LoginForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired()])
     password = PasswordField('Password',validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
-       
 
+class UserUpdateForm(FlaskForm):
+    pib = StringField('Ваше повне ім`я',validators=[DataRequired()])
+    email = EmailField('Ваша електрона адреса',validators=[DataRequired(),Email()])
+    phone= StringField('Ваш номер телефона',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
+    
+    def validate_phone(self, phone):
+        try:
+            p = phonenumbers.parse(phone.data)
+            if not phonenumbers.is_valid_number(p):
+                raise ValueError()
+        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
+            raise ValidationError('Invalid phone number')
+    
+    def validate_email(self,email):
+        user = Users.query.filter_by(email=email.data).first()
+        if user is not None:
+            raise ValidationError('Please use a different email address.')
+            
+    
 
     
 #View
@@ -151,7 +169,7 @@ def login():
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('login.html', form=form)
     
     
 
@@ -171,6 +189,8 @@ class RegistrationForm(FlaskForm):
         user = Users.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email address.')
+            
+
             
     def validate_phone(self, phone):
         try:
@@ -209,11 +229,13 @@ def contacts():
 @app.route('/price')
 def price():
     return render_template("price.html")
-    
 
-@app.route('/dashboard')
+@app.route('/dashboard')   
+@login_required
 def dashboard():
-    return render_template("dashboard.html")    
+    form = UserUpdateForm()
+    
+    return render_template("dashboard.html",form = form)    
 
 
 
