@@ -115,9 +115,9 @@ class LoginForm(FlaskForm):
     remember_me = BooleanField('Remember Me')
 
 class UserUpdateForm(FlaskForm):
-    pib = StringField('Ваше повне ім`я',validators=[DataRequired()])
-    email = EmailField('Ваша електрона адреса',validators=[DataRequired(),Email()])
-    phone= StringField('Ваш номер телефона',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
+    pib = StringField('Ваше повне ім`я')
+    email = EmailField('Ваша електрона адреса',validators=[Email()])
+    phone= StringField('Ваш номер телефона')
     
     def validate_phone(self, phone):
         try:
@@ -230,12 +230,41 @@ def contacts():
 def price():
     return render_template("price.html")
 
-@app.route('/dashboard')   
+@app.route('/dashboard',methods = ['GET', 'POST'])   
 @login_required
 def dashboard():
     form = UserUpdateForm()
+    id = current_user.id_users
+    usersupdate = Users.query.get_or_404(id)
+    if request.method == "POST":
+    	  usersupdate.pib = request.form['pib']
+    	  usersupdate.email= request.form['email']
+    	  usersupdate.phone_number= request.form['phone']
+    	  try:
+    	    db.session.commit()
+    	    flash("Дані оновлено!")
+    	    return render_template("dashboard.html",form = form,usersupdate = usersupdate)
+    	  except(ValueError):
+    	    flash("Помилка!")
+    	    return render_template("dashboard.html",form = form,usersupdate = usersupdate)
+    else:
+        return render_template("dashboard.html",form = form,usersupdate = usersupdate,id=id)
+          	    
+          	    
+          
+
+
+    	
+    	    
     
-    return render_template("dashboard.html",form = form)    
+    		
+    
+         
+         
+       
+    	
+    
+
 
 
 
