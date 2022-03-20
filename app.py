@@ -34,17 +34,6 @@ class Users(UserMixin,db.Model):
 
     def __repr__(self):
         return '<Name %r>' % self.ts_registry
-    
-   
-
-
-
-
-
-
-
-
-
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -64,6 +53,13 @@ class Feedback(db.Model):
 
     def __repr__(self):
         return '<Name %r>' % self.pib
+class Citys(db.Model):
+    __tablename__ = "citys"
+    id = db.Column(db.Integer, primary_key = True)
+    city = db.Column(db.String(255))
+   
+
+    
 
 
 class Controller(ModelView):
@@ -168,7 +164,7 @@ def login():
             flash('Invalid email or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
+        return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
     
     
@@ -243,12 +239,39 @@ def dashboard():
     	  try:
     	    db.session.commit()
     	    flash("Дані оновлено!")
-    	    return render_template("dashboard.html",form = form,usersupdate = usersupdate)
+    	    return render_template("dashboard.html",form = form,usersupdate = usersupdate,id = id)
     	  except(ValueError):
     	    flash("Помилка!")
-    	    return render_template("dashboard.html",form = form,usersupdate = usersupdate)
+    	    return render_template("dashboard.html",form = form,usersupdate = usersupdate,id = id)
     else:
         return render_template("dashboard.html",form = form,usersupdate = usersupdate,id=id)
+@app.route('/delete/<int:id>',methods = ['GET', 'POST'])
+@login_required
+def delete(id):
+    if id == current_user.id_users:
+        usersdelete = Users.query.get_or_404(id)
+      
+        
+        try:
+            db.session.delete(usersdelete)
+            db.session.commit()
+            flash("Профіль видалено!")
+            return redirect(url_for('index'))
+        except(ValueError):
+            return redirect(url_for('index'))
+    else:
+        flash("Помилка!")
+        return redirect(url_for('dashboard'))	
+        
+         	
+         	
+         	
+         
+    
+
+    	
+    
+        
           	    
           	    
           
