@@ -31,9 +31,11 @@ class Users(UserMixin,db.Model):
     password_hash = db.Column(db.String(128))
     ts_registry = db.Column(db.DateTime, default = datetime.utcnow())
     role = db.Column(db.String(50),default = "User")
+    citys = db.relationship("Citys",secondary = "orders")
+    
 
     def __repr__(self):
-        return '<Name %r>' % self.ts_registry
+        return  self.pib
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -57,9 +59,38 @@ class Citys(db.Model):
     __tablename__ = "citys"
     id = db.Column(db.Integer, primary_key = True)
     city = db.Column(db.String(255))
-   
+    users  = db.relationship("Users",secondary = "orders")
 
+    def __repr__(self):
+        return self.city
+
+class Orders(db.Model):
+    __tablename__ = "orders"
+    id_orders = db.Column(db.Integer, primary_key = True)
+    id_user= db.Column(db.Integer,db.ForeignKey('users.id_users'))
+    cargo = db.Column(db.String(150))
+    weight = db.Column(db.String(60))
+    check_orders = db.Column(db.String(50),default = "В обробці")
+    ts_orders = db.Column(db.DateTime,default = datetime.utcnow)
+    city_sender= db.Column(db.Integer,db.ForeignKey('citys.id'))
+    steet_sender= db.Column(db.String(255))
+    house_number = db.Column(db.Integer)
+    date_senders = db.Column(db.String(60),default ="__")
+    date_recipients = db.Column(db.String(60),default ="__")
+    pay_method = db.Column(db.String(60))
+    suma = db.Column(db.String(60),default ="__")
+    user = db.relationship('Users', backref="orders",overlaps ="citys,users")
+    city = db.relationship('Citys', backref="orders", overlaps ="citys,users")
     
+    
+    def __repr__(self):
+        return '<Name %r>' % self.cargo
+    
+    
+    
+class  AddOrders(FlaskForm):
+	  Cargo = StringField("Вантаж якій треба перевести")
+	
 
 
 class Controller(ModelView):
@@ -70,6 +101,9 @@ class Controller(ModelView):
 
 admin.add_view(Controller(Users, db.session))
 admin.add_view(Controller(Feedback, db.session))
+admin.add_view(Controller(Citys, db.session))
+admin.add_view(Controller(Orders, db.session))
+
 
 
 
@@ -89,7 +123,7 @@ def load_user(id_users):
 
 
 
-#Форма
+
 class FeedbackForm(FlaskForm):
     pib = StringField('Ваше повне ім`я',validators=[DataRequired()])
     email = EmailField('Ваша електрона адреса',validators=[DataRequired(),Email()])
