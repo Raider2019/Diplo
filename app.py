@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import phonenumbers
 from datetime import datetime
 from flask_wtf import FlaskForm
-from wtforms import IntegerField, StringField,EmailField,DateField,DecimalField, SelectField,TextAreaField,SubmitField,PasswordField,BooleanField
+from wtforms import IntegerField, StringField,EmailField,DateField,DecimalField, SelectField,TextAreaField,SubmitField,PasswordField,RadioField,BooleanField
 from wtforms.validators import DataRequired,Email,NumberRange, length,ValidationError,EqualTo
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
@@ -84,12 +84,51 @@ class Orders(db.Model):
     
     
     def __repr__(self):
-        return '<Name %r>' % self.cargo
+        return self.cargo
     
     
     
-class  AddOrders(FlaskForm):
-	  Cargo = StringField("Вантаж якій треба перевести")
+class  AddOrdersForm(FlaskForm):
+	  cargo = StringField("Вантаж якій треба перевести*",validators =[DataRequired()])
+	  weigh =  StringField("Вага вантажу*",validators =[DataRequired()])
+	  city_sender = SelectField("Місто відправника(селище)",choices=[],validators = [DataRequired()])
+	  street_sender =  StringField( "Вулиця відправника", validators = [DataRequired()],render_kw={"placeholder":"Вкажіть вулицю"}  )
+	  house_number = StringField("Номер квартири/офісу") 
+	  date_senders = DateField("Дата відправлення",validators = [DataRequired()],format = '%Y-%m-%d')
+	  pay_method = RadioField("Спосіб оплати", validators = [DataRequired()],choices=[('Карткою'),('Готівкою')])
+	  
+@app.route('/add_orders', methods = ['GET', 'POST'])
+@login_required
+def add_orders():
+	form = AddOrdersForm()
+
+	
+	if form.validate_on_submit():
+	 poster = current_user.id.users 
+	form.city_sender.choices =  [(s.city) for s in Citys.query]
+	cargo = form.cargo.data
+	weight = form.weigh.data
+	city_sender = form.city_sender.data
+	street_sender= form.street_sender.data
+	house_number = form.city_sender.data
+	date_senders = form.date_senders.data
+	pay_method = form.pay_method.data
+	order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,street_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
+	try:
+		db.session.add(order)
+		db.session.commit()
+		flash("Ваше замовлення додано!")
+		return redirect(url_for('dashboard'))	
+	except():
+		flash("Виникла помилка!") 
+		return render_template("add_orders.html",form=form)
+	else:
+	  return render_template("add_orders.html",form=form)
+   	
+	
+	  
+	  
+	  
 	
 
 
@@ -125,10 +164,10 @@ def load_user(id_users):
 
 
 class FeedbackForm(FlaskForm):
-    pib = StringField('Ваше повне ім`я',validators=[DataRequired()])
-    email = EmailField('Ваша електрона адреса',validators=[DataRequired(),Email()])
-    phone= StringField('Ваш номер телефона',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
-    comments = TextAreaField("Ваш коментар",validators=[DataRequired(),length( max=255,message='Кометар великий')])
+    pib = StringField('Ваше повне ім`я*',validators=[DataRequired()])
+    email = EmailField('Ваша електрона адреса*',validators=[DataRequired(),Email()])
+    phone= StringField('Ваш номер телефона*',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
+    comments = TextAreaField("Ваш коментар*",validators=[DataRequired(),length( max=255,message='Кометар великий')])
     submit = SubmitField('Send')
     
     def validate_phone(self, phone):
@@ -274,11 +313,17 @@ def dashboard():
     	    db.session.commit()
     	    flash("Дані оновлено!")
     	    return render_template("dashboard.html",form = form,usersupdate = usersupdate,id = id)
-    	  except(ValueError):
+    	  except():
     	    flash("Помилка!")
     	    return render_template("dashboard.html",form = form,usersupdate = usersupdate,id = id)
     else:
         return render_template("dashboard.html",form = form,usersupdate = usersupdate,id=id)
+
+	
+    
+	
+	
+	
 @app.route('/delete/<int:id>',methods = ['GET', 'POST'])
 @login_required
 def delete(id):
@@ -291,7 +336,7 @@ def delete(id):
             db.session.commit()
             flash("Профіль видалено!")
             return redirect(url_for('index'))
-        except(ValueError):
+        except():
             return redirect(url_for('index'))
     else:
         flash("Помилка!")

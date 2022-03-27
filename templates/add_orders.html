@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}
+Реєстрація
+{%  endblock  %}
+
+{% block body %}
+{% for message in get_flashed_messages() %}
+<div class="container-xl mt-4">
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+  {{message}}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  </div>
+</div>
+{% endfor %}
+        <div class="offset-sm-3 col-md-6">
+            <h1 class=" mt-4 ">Додати замовлення</h1>
+            <form method="post" action="">
+                {{form.hidden_tag()}}
+                {{wtf.form_field(form.сargo)}}
+                {{wtf.form_field(form.weight)}}
+                {{wtf.form_field(form.city_sender)}}
+                
+                
+                {{wtf.form_field(form.street_sender)}}
+                {{wtf.form_field(form.house_number)}}
+                 {{wtf.form_field(form.pay_method)}}
+                
+                <button type="submit" class="btn btn-success">Send</button>
+            </form>
+        
+        
+        </div>
+        </div>
+
+</div>
+{% endblock %}
