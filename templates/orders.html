@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block title %}
+Профіль
+{%  endblock  %}
+
+{% block body %}
+{% for message in get_flashed_messages() %}
+<div class="container-xl mt-4">
+  <div class="alert alert-info alert-dismissible fade show" role="alert">
+  {{message}}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  </div>
+</div>
+{% endfor %}
+
+        <div class="container-fluid">
+            <h1 class=" mt-4 ">Профіль:</h1>
+   {% for order in order %}         
+         <div class="card mb-4" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">{{order.id_orders}}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Ваш електроний адрес:  {{order.user}}</h6>
+    <p class="card-text"><strong>Ваш номер телефона:</strong> {{current_user.phone_number}}</p>
+        <p class="card-text"><strong>Дата реєстрацій</strong> {{current_user.ts_registry}}</p>
+ 
+    
+    
+    
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}

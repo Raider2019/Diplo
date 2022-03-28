@@ -20,12 +20,14 @@
             <h1 class=" mt-4 ">Додати замовлення</h1>
             <form method="post" action="">
                 {{form.hidden_tag()}}
-                {{wtf.form_field(form.сargo)}}
+                {{wtf.form_field(form.cargo)}}
                 {{wtf.form_field(form.weight)}}
                 {{wtf.form_field(form.city_sender)}}
                 
                 
                 {{wtf.form_field(form.street_sender)}}
+                {{wtf.form_field(form.date_senders)}}
+               
                 {{wtf.form_field(form.house_number)}}
                  {{wtf.form_field(form.pay_method)}}
                 

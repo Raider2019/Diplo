@@ -59,7 +59,7 @@ class Citys(db.Model):
     __tablename__ = "citys"
     id = db.Column(db.Integer, primary_key = True)
     city = db.Column(db.String(255))
-    users  = db.relationship("Users",secondary = "orders")
+    users  = db.relationship("Users",secondary = "orders",lazy = 'subquery')
 
     def __repr__(self):
         return self.city
@@ -79,8 +79,8 @@ class Orders(db.Model):
     date_recipients = db.Column(db.String(60),default ="__")
     pay_method = db.Column(db.String(60))
     suma = db.Column(db.String(60),default ="__")
-    user = db.relationship('Users', backref="orders",overlaps ="citys,users")
-    city = db.relationship('Citys', backref="orders", overlaps ="citys,users")
+    user = db.relationship('Users', backref=db.backref("orders",overlaps ="citys,user",cascade="all, delete-orphan",lazy = "dynamic"))
+    city = db.relationship('Citys', backref=db.backref("orders", overlaps ="citys,users",cascade="all, delete-orphan",lazy = "dynamic"))
     
     
     def __repr__(self):
@@ -90,7 +90,7 @@ class Orders(db.Model):
     
 class  AddOrdersForm(FlaskForm):
 	  cargo = StringField("Вантаж якій треба перевести*",validators =[DataRequired()])
-	  weigh =  StringField("Вага вантажу*",validators =[DataRequired()])
+	  weight =  StringField("Вага вантажу*",validators =[DataRequired()])
 	  city_sender = SelectField("Місто відправника(селище)",choices=[],validators = [DataRequired()])
 	  street_sender =  StringField( "Вулиця відправника", validators = [DataRequired()],render_kw={"placeholder":"Вкажіть вулицю"}  )
 	  house_number = StringField("Номер квартири/офісу") 
@@ -100,31 +100,34 @@ class  AddOrdersForm(FlaskForm):
 @app.route('/add_orders', methods = ['GET', 'POST'])
 @login_required
 def add_orders():
-	form = AddOrdersForm()
+ form = AddOrdersForm()
+ form.city_sender.choices =  [(s.city) for s in Citys.query]
+ poster = current_user.id_users 
+ cargo = form.cargo.data
+ weight = form.weight.data
+ city_sender = form.city_sender.data
+ street_sender= form.street_sender.data
+ house_number = form.city_sender.data
+ date_senders = form.date_senders.data
+ pay_method = form.pay_method.data
+ if form.validate_on_submit():
+ 
+     order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,steet_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
+     flash("Ваше замовлення додано!")
+     db.session.add(order)
+     db.session.commit()
+  
+ return render_template("add_orders.html",form=form)
 
-	
-	if form.validate_on_submit():
-	 poster = current_user.id.users 
-	form.city_sender.choices =  [(s.city) for s in Citys.query]
-	cargo = form.cargo.data
-	weight = form.weigh.data
-	city_sender = form.city_sender.data
-	street_sender= form.street_sender.data
-	house_number = form.city_sender.data
-	date_senders = form.date_senders.data
-	pay_method = form.pay_method.data
-	order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,street_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
-	try:
-		db.session.add(order)
-		db.session.commit()
-		flash("Ваше замовлення додано!")
-		return redirect(url_for('dashboard'))	
-	except():
-		flash("Виникла помилка!") 
-		return render_template("add_orders.html",form=form)
-	else:
-	  return render_template("add_orders.html",form=form)
+@app.route('/orders')
+@login_required
+def orders():
+   	id = current_user.id_users
+   	user = Users.query.first_or_404(id)
+   	order = user.orders.all()
+   	return render_template("orders.html",id = id ,user = user , order = order)
    	
+	 
 	
 	  
 	  
@@ -313,7 +316,7 @@ def dashboard():
     	    db.session.commit()
     	    flash("Дані оновлено!")
     	    return render_template("dashboard.html",form = form,usersupdate = usersupdate,id = id)
-    	  except():
+    	  except(ValueError):
     	    flash("Помилка!")
     	    return render_template("dashboard.html",form = form,usersupdate = usersupdate,id = id)
     else:
@@ -336,7 +339,7 @@ def delete(id):
             db.session.commit()
             flash("Профіль видалено!")
             return redirect(url_for('index'))
-        except():
+        except(ValueError):
             return redirect(url_for('index'))
     else:
         flash("Помилка!")
