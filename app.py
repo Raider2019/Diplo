@@ -101,13 +101,13 @@ class  AddOrdersForm(FlaskForm):
 @login_required
 def add_orders():
  form = AddOrdersForm()
- form.city_sender.choices =  [(s.city) for s in Citys.query]
+ form.city_sender.choices =  [(s.id,s.city) for s in Citys.query]
  poster = current_user.id_users 
  cargo = form.cargo.data
  weight = form.weight.data
  city_sender = form.city_sender.data
  street_sender= form.street_sender.data
- house_number = form.city_sender.data
+ house_number = form.house_number.data
  date_senders = form.date_senders.data
  pay_method = form.pay_method.data
  if form.validate_on_submit():
@@ -116,6 +116,7 @@ def add_orders():
      flash("Ваше замовлення додано!")
      db.session.add(order)
      db.session.commit()
+     return redirect(url_for('dashboard'))
   
  return render_template("add_orders.html",form=form)
 
@@ -124,7 +125,7 @@ def add_orders():
 def orders():
    	id = current_user.id_users
    	user = Users.query.first_or_404(id)
-   	order = user.orders.all()
+   	order = user.orders.order_by(Orders.ts_orders.desc()).all()
    	return render_template("orders.html",id = id ,user = user , order = order)
    	
 	 
