@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 {% block title %}
-Профіль
+Замовлення'
 {%  endblock  %}
 
 {% block body %}
@@ -18,7 +18,7 @@
 {% endfor %}
 
         <div class="container-fluid">
-            <h1 class=" mt-4 ">Профіль:</h1>
+            <h1 class=" mt-4 ">Замовлення:</h1>
    {% for order in order %}         
          <div class="card mb-4" style="width: 18rem;">
   <div class="card-body">
@@ -32,6 +32,22 @@
     
   </div>
 </div>
-{% endfor %}
+{% endfor %} 
 
+{% if prev_url %} 
+  <ul class="pagination">
+    <li class="page-item ">
+      <a class="page-link" href ="{{ prev_url }}">Previous page</a>
+    </li> 
+    </ul>
+
+{% endif %}
+{% if next_url %}
+ <ul class="pagination">
+    <li class="page-item ">
+      <a class="page-link" href ="{{ next_url }}">Next page</a>
+    </li> 
+    </ul>
+
+{% endif %}
 {% endblock %}

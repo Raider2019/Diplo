@@ -15,7 +15,8 @@ from flask_admin.contrib.sqla import ModelView
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b\x1aL\x05}\xe6\xfb\xf2\xd5\x13`S\x89\x8f/\xc5\xfcO\x93fN?\xe1\xa1\xe1\x0b\x01\xf7\x88Y\x12\xbe|' 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Perevoski.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
+app.config['POSTS_PER_PAGE'] =25
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 migrate = Migrate(app, db)
@@ -31,7 +32,7 @@ class Users(UserMixin,db.Model):
     password_hash = db.Column(db.String(128))
     ts_registry = db.Column(db.DateTime, default = datetime.utcnow())
     role = db.Column(db.String(50),default = "User")
-    citys = db.relationship("Citys",secondary = "orders")
+    citys = db.relationship("Citys",secondary = "orders", overlaps = "users")
     
 
     def __repr__(self):
@@ -44,7 +45,11 @@ class Users(UserMixin,db.Model):
         return check_password_hash(self.password_hash,password)
 
     def get_id(self):
-        return (self.id_users)
+        return (self.id_users) 
+        
+@login.user_loader
+def load_user(id_users):
+    return Users.query.get(int(id_users))
 class Feedback(db.Model):
     user_id = db.Column(db.Integer, primary_key = True)
     pib = db.Column(db.String(255))
@@ -59,7 +64,7 @@ class Citys(db.Model):
     __tablename__ = "citys"
     id = db.Column(db.Integer, primary_key = True)
     city = db.Column(db.String(255))
-    users  = db.relationship("Users",secondary = "orders",lazy = 'subquery')
+    users  = db.relationship("Users",secondary = "orders",overlaps = "citys")
 
     def __repr__(self):
         return self.city
@@ -73,14 +78,14 @@ class Orders(db.Model):
     check_orders = db.Column(db.String(50),default = "В обробці")
     ts_orders = db.Column(db.DateTime,default = datetime.utcnow)
     city_sender= db.Column(db.Integer,db.ForeignKey('citys.id'))
-    steet_sender= db.Column(db.String(255))
+    street_sender= db.Column(db.String(255))
     house_number = db.Column(db.Integer)
-    date_senders = db.Column(db.String(60),default ="__")
-    date_recipients = db.Column(db.String(60),default ="__")
+    date_senders = db.Column(db.String(50))
+    date_recipients = db.Column(db.String(50))
     pay_method = db.Column(db.String(60))
     suma = db.Column(db.String(60),default ="__")
-    user = db.relationship('Users', backref=db.backref("orders",overlaps ="citys,user",cascade="all, delete-orphan",lazy = "dynamic"))
-    city = db.relationship('Citys', backref=db.backref("orders", overlaps ="citys,users",cascade="all, delete-orphan",lazy = "dynamic"))
+    user = db.relationship('Users', backref=db.backref("orders",overlaps ="citys,user",cascade="all, delete-orphan",lazy = "dynamic"),overlaps = "citys,users")
+    city = db.relationship('Citys', backref=db.backref("orders", overlaps ="citys,users",cascade="all, delete-orphan",lazy = "dynamic"),overlaps = "citys,users")
     
     
     def __repr__(self):
@@ -112,7 +117,7 @@ def add_orders():
  pay_method = form.pay_method.data
  if form.validate_on_submit():
  
-     order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,steet_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
+     order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,street_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
      flash("Ваше замовлення додано!")
      db.session.add(order)
      db.session.commit()
@@ -123,10 +128,20 @@ def add_orders():
 @app.route('/orders')
 @login_required
 def orders():
-   	id = current_user.id_users
-   	user = Users.query.first_or_404(id)
-   	order = user.orders.order_by(Orders.ts_orders.desc()).all()
-   	return render_template("orders.html",id = id ,user = user , order = order)
+   	
+       id = current_user.id_users
+       user = Users.query.first_or_404(id)  
+       page = request.args.get('page', 0, type=int)
+       order = user.orders.order_by(Orders.ts_orders.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+       next_url = url_for('orders', page=order.next_num) \
+        if order.has_next else None
+       prev_url = url_for('orders', page=order.prev_num) \
+        if order.has_prev else None
+       return render_template("orders.html", order=order.items,
+                          next_url=next_url, prev_url=prev_url)
+   
+
    	
 	 
 	
@@ -138,9 +153,8 @@ def orders():
 
 class Controller(ModelView):
      def is_accessible(self):
-            return current_user.role == "Admin"
-     def not_auth(self):
-            return redirect(url_for('index'))
+            return current_user.is_authenticated and current_user.role =="Admin"
+     
 
 admin.add_view(Controller(Users, db.session))
 admin.add_view(Controller(Feedback, db.session))
@@ -160,9 +174,6 @@ admin.add_view(Controller(Orders, db.session))
 
 
 
-@login.user_loader
-def load_user(id_users):
-    return Users.query.get(int(id_users))
 
 
 
