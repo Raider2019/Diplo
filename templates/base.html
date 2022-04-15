@@ -12,7 +12,8 @@
     as="style">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="static/style.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}" />
+
   <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
   <title>{% block title %}{% endblock %}</title>
 </head>
@@ -59,6 +60,13 @@
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('logout')}}">Вийти</a>
         </li>
+           <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('add_orders')}}">Оформити замовлення </a>
+          
+        </li>
+           <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('orders')}}">Ваші замовлення</a>
+        </li>
   </ul>
 </div>
       
@@ -80,7 +88,7 @@
         <div class="col-md-8 col-7">
           <p> © Всі права захищені і належать підприємству "Вантажні перевезення"</p>
         </div>
-        <div class="col-md-2 col-5"> <a href=""><img src="static/img/facebook.svg" alt=""></a></div>
+        <div class="col-md-2 col-5"> <a href=""><img  src="{{ url_for('static', filename='img/facebook.svg') }}"  alt=""></a></div>
       </div>
     </div>
   </div>

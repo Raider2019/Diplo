@@ -80,8 +80,8 @@ class Orders(db.Model):
     city_sender= db.Column(db.Integer,db.ForeignKey('citys.id'))
     street_sender= db.Column(db.String(255))
     house_number = db.Column(db.Integer)
-    date_senders = db.Column(db.String(50))
-    date_recipients = db.Column(db.String(50))
+    date_senders = db.Column(db.Date)
+    date_recipients = db.Column(db.Date)
     pay_method = db.Column(db.String(60))
     suma = db.Column(db.String(60),default ="__")
     user = db.relationship('Users', backref=db.backref("orders",overlaps ="citys,user",cascade="all, delete-orphan",lazy = "dynamic"),overlaps = "citys,users")
@@ -101,6 +101,8 @@ class  AddOrdersForm(FlaskForm):
 	  house_number = StringField("Номер квартири/офісу") 
 	  date_senders = DateField("Дата відправлення",validators = [DataRequired()],format = '%Y-%m-%d')
 	  pay_method = RadioField("Спосіб оплати", validators = [DataRequired()],choices=[('Карткою'),('Готівкою')])
+	  
+
 	  
 @app.route('/add_orders', methods = ['GET', 'POST'])
 @login_required
@@ -197,24 +199,15 @@ class LoginForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired()])
     password = PasswordField('Password',validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
+        
+
 
 class UserUpdateForm(FlaskForm):
     pib = StringField('Ваше повне ім`я')
     email = EmailField('Ваша електрона адреса',validators=[Email()])
     phone= StringField('Ваш номер телефона')
-    
-    def validate_phone(self, phone):
-        try:
-            p = phonenumbers.parse(phone.data)
-            if not phonenumbers.is_valid_number(p):
-                raise ValueError()
-        except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
-            raise ValidationError('Invalid phone number')
-    
-    def validate_email(self,email):
-        user = Users.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError('Please use a different email address.')
+  
+
             
     
 
@@ -357,9 +350,65 @@ def delete(id):
         flash("Помилка!")
         return redirect(url_for('dashboard'))	
         
+@app.route('/orders/edit/<int:id>',methods = ['GET', 'POST'])
+def edit_order(id):
+    order  = Orders.query.get_or_404(id)
+    form = AddOrdersForm()
+    form.city_sender.choices =  [(s.id,s.city) for s in Citys.query]
+    if request.method == 'POST':
+    	order.cargo = form.cargo.data
+    	
+    	
+    	order.weight = form.weight.data
+   
+    	order.street_sender = form.street_sender.data
+    	order.house_number = form.house_number.data
+    	order.date_senders = form.date_senders.data 
+    	db.session.add(order)
+    	db.session.commit()
+    	flash('Update Data!')
+    	return redirect(url_for('orders',id = order.id_orders))
+    form.cargo.data = order.cargo
+    form.weight.data = order.weight
+    form.city_sender.data = order.city
+    form.street_sender.data = order.street_sender
+    form.house_number.data = order.house_number
+    form.date_senders.data = order.date_senders
+    return render_template('edit_orders.html',form = form)
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	    
+		
+		
+		
+		
+		
+	
+		
+	
+
+       
+      
+     
+       
+            
+       
+       	
+       
+   
+        
          	
          	
-         	
+	
          
     
 

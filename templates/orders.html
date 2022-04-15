@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 {% block title %}
-Замовлення'
+Замовлення
 {%  endblock  %}
 
 {% block body %}
@@ -23,9 +23,21 @@
          <div class="card mb-4" style="width: 18rem;">
   <div class="card-body">
     <h5 class="card-title">{{order.id_orders}}</h5>
-    <h6 class="card-subtitle mb-2 text-muted">Ваш електроний адрес:  {{order.user}}</h6>
-    <p class="card-text"><strong>Ваш номер телефона:</strong> {{order.city}}</p>
-        <p class="card-text"><strong>Дата реєстрацій</strong> {{order.cargo}}</p>
+    <h6 class="card-subtitle mb-2 text-muted">Ваше ім'я:  {{order.user}}</h6>
+    <p class="card-text"><strong>Місто відправкі вантажу:</strong> {{order.city}}</p>
+        <p class="card-text"><strong>Вантаж якій треба перевести:</strong> {{order.cargo}}</p>
+              <p class="card-text"><strong>Вага вантажу :</strong> {{order.weight}}    
+              </p>
+                    <p class="card-text"><strong>Вулиця звідкі треба забрати вантаж:</strong> {{order.street_sender}}</p>
+                          <p class="card-text"><strong>Номер квартири/офісу:</strong> {{order.house_number}}</p>
+                                <p class="card-text"><strong>Дата відправкі :</strong> {{order.date_senders}}</p>
+                                      <p class="card-text"><strong>Дата отримання вантажу:</strong> {{order.date_recipients}}</p>
+                                         <p class="card-text"><strong>Метод якім оплачується замовлення:</strong> {{order.pay_method}}</p>
+                                            <p class="card-text"><strong>Сума до сплати:</strong> {{order.suma}}</p>
+                                              <a class="btn btn-success" href ="{{ url_for('edit_order',id = order.id_orders) }}">Редагувати</a>
+    </li> 
+
+                                          
  
     
     

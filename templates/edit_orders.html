@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% import 'bootstrap/wtf.html' as wtf %}
 {% block title %}
-Додати замовлення
+Змінити замовлення
 {%  endblock  %}
 
 {% block body %}
@@ -17,19 +17,19 @@
 </div>
 {% endfor %}
         <div class=" col-12">
-            <h1 class=" mt-4 ">Додати замовлення</h1>
+            <h1 class=" mt-4 ">Змінити замовлення</h1>
             <form method="post" action="">
                 {{form.hidden_tag()}}
                 {{wtf.form_field(form.cargo)}}
                 {{wtf.form_field(form.weight)}}
-                {{wtf.form_field(form.city_sender)}}
+                
                 
                 
                 {{wtf.form_field(form.street_sender)}}
                 {{wtf.form_field(form.date_senders)}}
                
                 {{wtf.form_field(form.house_number)}}
-                 {{wtf.form_field(form.pay_method)}}
+                 
                 
                 <button type="submit" class="btn btn-success">Send</button>
             </form>
