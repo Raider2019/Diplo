@@ -10,19 +10,27 @@ from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import LoginManager, UserMixin,current_user,login_user,logout_user,login_required
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla import ModelView 
+from flask_mail import Mail, Message
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b\x1aL\x05}\xe6\xfb\xf2\xd5\x13`S\x89\x8f/\xc5\xfcO\x93fN?\xe1\xa1\xe1\x0b\x01\xf7\x88Y\x12\xbe|' 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Perevoski.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
-app.config['POSTS_PER_PAGE'] =25
+app.config['POSTS_PER_PAGE'] =25 
+app.config['MAIL_SERVER']='smtp.mailtrap.io'
+app.config['MAIL_PORT'] = 2525
+app.config['MAIL_USERNAME'] = 'bc0a65619ba2db' 
+app.config['MAIL_PASSWORD'] = 'd6fd3e2574cf77' 
+app.config['MAIL_USE_TLS'] = True 
+app.config['MAIL_USE_SSL'] = False
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 admin = Admin(app,name = 'Admin')
-login.login_view = 'login'
+login.login_view = 'login' 
+mail = Mail(app)
 #Модель
 class Users(UserMixin,db.Model):
     id_users = db.Column(db.Integer, primary_key = True)
@@ -116,13 +124,22 @@ def add_orders():
  street_sender= form.street_sender.data
  house_number = form.house_number.data
  date_senders = form.date_senders.data
- pay_method = form.pay_method.data
+ pay_method = form.pay_method.data 
+ pib = current_user.pib 
+ email = current_user.email 
+ phone_number = current_user.phone_number  
+ city_send = Citys.query.first()
  if form.validate_on_submit():
  
      order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,street_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
-     flash("Ваше замовлення додано!")
+
      db.session.add(order)
-     db.session.commit()
+     db.session.commit()  
+     msg = Message("Feedback", recipients=[app.config['MAIL_USERNAME']],sender = email) 
+     msg.body = f'Нове замовлення від {pib}, номер телефона:{phone_number}.Вантаж:{cargo},вага:{weight},місто відправник:{ city_send.city }, вулиця відправник:{street_sender},номер квартири/офісу:{house_number}, дата відправкі:{date_senders},спосіб оплати:{pay_method}'
+     mail.send(msg)
+     
+     flash("Ваше замовлення додано!")
      return redirect(url_for('dashboard'))
   
  return render_template("add_orders.html",form=form)
@@ -222,13 +239,17 @@ def index():
     form = FeedbackForm()
     if form.validate_on_submit():
         pib = form.pib.data
-        email = form.pib.data
+        email = form.email.data
         phone_number = form.phone.data
         comments = form.comments.data
         feedback = Feedback(pib= pib,email = email, phone_number = phone_number, comments = comments)
-        flash("Дані відпралено. Ми зв'язимся з вами.")
+    
         db.session.add(feedback)
-        db.session.commit()
+        db.session.commit() 
+        msg = Message("Feedback", recipients=[app.config['MAIL_USERNAME']],sender = email) 
+        msg.body = f'Новий комментар від {pib}.Номер телефона:{phone_number},комментар:{comments}.'
+        mail.send(msg)
+        flash("Дані відпралено. Ми зв'язимся з вами.")
         return redirect(url_for('index'))
  
       
@@ -304,8 +325,9 @@ def contacts():
     return render_template ("contatcts.html")
 
 @app.route('/price')
-def price():
-    return render_template("price.html")
+def price(): 
+    city = Citys.query.all()
+    return render_template("price.html",city = city)
 
 @app.route('/dashboard',methods = ['GET', 'POST'])   
 @login_required
@@ -370,7 +392,6 @@ def edit_order(id):
     	return redirect(url_for('orders',id = order.id_orders))
     form.cargo.data = order.cargo
     form.weight.data = order.weight
-    form.city_sender.data = order.city
     form.street_sender.data = order.street_sender
     form.house_number.data = order.house_number
     form.date_senders.data = order.date_senders

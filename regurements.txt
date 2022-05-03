@@ -1,5 +1,6 @@
 alembic==1.7.5
 asgiref==3.4.1
+blinker==1.4
 click==8.0.3
 colorama==0.4.4
 distlib==0.3.4
@@ -11,6 +12,7 @@ Flask==2.0.2
 Flask-Admin==1.6.0
 Flask-Bootstrap==3.3.7.1
 Flask-Login==0.5.0
+Flask-Mail==0.9.1
 Flask-Migrate==3.1.0
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==1.0.0
