@@ -128,15 +128,15 @@ def add_orders():
  pib = current_user.pib 
  email = current_user.email 
  phone_number = current_user.phone_number  
- city_send = Citys.query.first()
+ citys = Citys.query.filter_by(id = city_sender).first()
  if form.validate_on_submit():
- 
+
      order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,street_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
 
      db.session.add(order)
      db.session.commit()  
-     msg = Message("Feedback", recipients=[app.config['MAIL_USERNAME']],sender = email) 
-     msg.body = f'Нове замовлення від {pib}, номер телефона:{phone_number}.Вантаж:{cargo},вага:{weight},місто відправник:{ city_send.city }, вулиця відправник:{street_sender},номер квартири/офісу:{house_number}, дата відправкі:{date_senders},спосіб оплати:{pay_method}'
+     msg = Message("New orders", recipients=[app.config['MAIL_USERNAME']],sender = email) 
+     msg.body = f'Нове замовлення від {pib}, номер телефона:{phone_number}.Вантаж:{cargo},вага:{weight},місто відправник:{citys.city}, вулиця відправник:{street_sender},номер квартири/офісу:{house_number}, дата відправкі:{date_senders},спосіб оплати:{pay_method}'
      mail.send(msg)
      
      flash("Ваше замовлення додано!")
