@@ -10,26 +10,26 @@ from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import LoginManager, UserMixin,current_user,login_user,logout_user,login_required
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView 
+from flask_admin.contrib.sqla import ModelView
 from flask_mail import Mail, Message
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'b\x1aL\x05}\xe6\xfb\xf2\xd5\x13`S\x89\x8f/\xc5\xfcO\x93fN?\xe1\xa1\xe1\x0b\x01\xf7\x88Y\x12\xbe|' 
+app.config['SECRET_KEY'] = 'b\x1aL\x05}\xe6\xfb\xf2\xd5\x13`S\x89\x8f/\xc5\xfcO\x93fN?\xe1\xa1\xe1\x0b\x01\xf7\x88Y\x12\xbe|'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Perevoski.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
-app.config['POSTS_PER_PAGE'] =25 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['POSTS_PER_PAGE'] =25
 app.config['MAIL_SERVER']='smtp.mailtrap.io'
 app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = 'bc0a65619ba2db' 
-app.config['MAIL_PASSWORD'] = 'd6fd3e2574cf77' 
-app.config['MAIL_USE_TLS'] = True 
+app.config['MAIL_USERNAME'] = 'bc0a65619ba2db'
+app.config['MAIL_PASSWORD'] = 'd6fd3e2574cf77'
+app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
 admin = Admin(app,name = 'Admin')
-login.login_view = 'login' 
+login.login_view = 'login'
 mail = Mail(app)
 #Модель
 class Users(UserMixin,db.Model):
@@ -41,7 +41,7 @@ class Users(UserMixin,db.Model):
     ts_registry = db.Column(db.DateTime, default = datetime.utcnow())
     role = db.Column(db.String(50),default = "User")
     citys = db.relationship("Citys",secondary = "orders", overlaps = "users")
-    
+
 
     def __repr__(self):
         return  self.pib
@@ -53,8 +53,8 @@ class Users(UserMixin,db.Model):
         return check_password_hash(self.password_hash,password)
 
     def get_id(self):
-        return (self.id_users) 
-        
+        return (self.id_users)
+
 @login.user_loader
 def load_user(id_users):
     return Users.query.get(int(id_users))
@@ -94,62 +94,62 @@ class Orders(db.Model):
     suma = db.Column(db.String(60),default ="__")
     user = db.relationship('Users', backref=db.backref("orders",overlaps ="citys,user",cascade="all, delete-orphan",lazy = "dynamic"),overlaps = "citys,users")
     city = db.relationship('Citys', backref=db.backref("orders", overlaps ="citys,users",cascade="all, delete-orphan",lazy = "dynamic"),overlaps = "citys,users")
-    
-    
+
+
     def __repr__(self):
         return self.cargo
-    
-    
-    
+
+
+
 class  AddOrdersForm(FlaskForm):
 	  cargo = StringField("Вантаж якій треба перевести*",validators =[DataRequired()])
 	  weight =  StringField("Вага вантажу*",validators =[DataRequired()])
-	  city_sender = SelectField("Місто відправника(селище)",choices=[],validators = [DataRequired()])
-	  street_sender =  StringField( "Вулиця відправника", validators = [DataRequired()],render_kw={"placeholder":"Вкажіть вулицю"}  )
-	  house_number = StringField("Номер квартири/офісу") 
-	  date_senders = DateField("Дата відправлення",validators = [DataRequired()],format = '%Y-%m-%d')
-	  pay_method = RadioField("Спосіб оплати", validators = [DataRequired()],choices=[('Карткою'),('Готівкою')])
-	  
+	  city_sender = SelectField("Місто відправника(селище)*",choices=[],validators = [DataRequired()])
+	  street_sender =  StringField( "Вулиця відправника*", validators = [DataRequired()],render_kw={"placeholder":"Вкажіть вулицю"}  )
+	  house_number = StringField("Номер квартири/офісу")
+	  date_senders = DateField("Дата відправлення*",validators = [DataRequired()],format = '%Y-%m-%d')
+	  pay_method = SelectField("Спосіб оплати*", validators = [DataRequired()],choices=[('Карткою'),('Готівкою')])
 
-	  
+
+
 @app.route('/add_orders', methods = ['GET', 'POST'])
 @login_required
 def add_orders():
  form = AddOrdersForm()
  form.city_sender.choices =  [(s.id,s.city) for s in Citys.query]
- poster = current_user.id_users 
+ poster = current_user.id_users
  cargo = form.cargo.data
  weight = form.weight.data
  city_sender = form.city_sender.data
  street_sender= form.street_sender.data
  house_number = form.house_number.data
  date_senders = form.date_senders.data
- pay_method = form.pay_method.data 
- pib = current_user.pib 
- email = current_user.email 
- phone_number = current_user.phone_number  
+ pay_method = form.pay_method.data
+ pib = current_user.pib
+ email = current_user.email
+ phone_number = current_user.phone_number
  citys = Citys.query.filter_by(id = city_sender).first()
  if form.validate_on_submit():
 
      order = Orders(id_user = poster, cargo = cargo, weight = weight,city_sender =city_sender,street_sender = street_sender,               house_number = house_number,date_senders=date_senders,pay_method=pay_method)
 
      db.session.add(order)
-     db.session.commit()  
-     msg = Message("New orders", recipients=[app.config['MAIL_USERNAME']],sender = email) 
+     db.session.commit()
+     msg = Message("New orders", recipients=[app.config['MAIL_USERNAME']],sender = email)
      msg.body = f'Нове замовлення від {pib}, номер телефона:{phone_number}.Вантаж:{cargo},вага:{weight},місто відправник:{citys.city}, вулиця відправник:{street_sender},номер квартири/офісу:{house_number}, дата відправкі:{date_senders},спосіб оплати:{pay_method}'
      mail.send(msg)
-     
+
      flash("Ваше замовлення додано!")
      return redirect(url_for('dashboard'))
-  
+
  return render_template("add_orders.html",form=form)
 
 @app.route('/orders')
 @login_required
 def orders():
-   	
+
        id = current_user.id_users
-       user = Users.query.first_or_404(id)  
+       user = Users.query.first_or_404(id)
        page = request.args.get('page', 0, type=int)
        order = user.orders.order_by(Orders.ts_orders.desc()).paginate(
         page, app.config['POSTS_PER_PAGE'], False)
@@ -159,21 +159,21 @@ def orders():
         if order.has_prev else None
        return render_template("orders.html", order=order.items,
                           next_url=next_url, prev_url=prev_url)
-   
 
-   	
-	 
-	
-	  
-	  
-	  
-	
+
+
+
+
+
+
+
+
 
 
 class Controller(ModelView):
      def is_accessible(self):
             return current_user.is_authenticated and current_user.role =="Admin"
-     
+
 
 admin.add_view(Controller(Users, db.session))
 admin.add_view(Controller(Feedback, db.session))
@@ -203,7 +203,7 @@ class FeedbackForm(FlaskForm):
     phone= StringField('Ваш номер телефона*',validators=[DataRequired(), length(max = 15)],render_kw={"placeholder":"+380XXXXXXXXX"})
     comments = TextAreaField("Ваш коментар*",validators=[DataRequired(),length( max=255,message='Кометар великий')])
     submit = SubmitField('Send')
-    
+
     def validate_phone(self, phone):
         try:
             p = phonenumbers.parse(phone.data)
@@ -216,19 +216,19 @@ class LoginForm(FlaskForm):
     email = StringField('Email',validators=[DataRequired()])
     password = PasswordField('Password',validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
-        
+
 
 
 class UserUpdateForm(FlaskForm):
     pib = StringField('Ваше повне ім`я')
     email = EmailField('Ваша електрона адреса',validators=[Email()])
     phone= StringField('Ваш номер телефона')
-  
 
-            
-    
 
-    
+
+
+
+
 #View
 
 
@@ -243,16 +243,16 @@ def index():
         phone_number = form.phone.data
         comments = form.comments.data
         feedback = Feedback(pib= pib,email = email, phone_number = phone_number, comments = comments)
-    
+
         db.session.add(feedback)
-        db.session.commit() 
-        msg = Message("Feedback", recipients=[app.config['MAIL_USERNAME']],sender = email) 
+        db.session.commit()
+        msg = Message("Feedback", recipients=[app.config['MAIL_USERNAME']],sender = email)
         msg.body = f'Новий комментар від {pib}.Номер телефона:{phone_number},комментар:{comments}.'
         mail.send(msg)
         flash("Дані відпралено. Ми зв'язимся з вами.")
         return redirect(url_for('index'))
- 
-      
+
+
     return render_template('index.html',form = form)
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -268,28 +268,34 @@ def login():
         login_user(user, remember=form.remember_me.data)
         return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
-    
-    
+
+
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
-      
+
 class RegistrationForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])	
+    email = StringField('Email', validators=[DataRequired(), Email()])
     pib = StringField('Ваш ПІБ', validators=[DataRequired()])
     phone =StringField('Ваш номер телефона', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired(),length(min=8, max=16)])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    
+
     def validate_email(self,email):
         user = Users.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError('Please use a different email address.')
-            
 
-            
+    def validate_password(self, password) :
+        excluded_chars = " *?!'^+%&;/()=}][ЙЦУКЕНГШЩЗХЇФІВАПРОЛДЖЄҐЯЧСМИТЬБЮйцукенгшщзхїфівапролджєґячсмитьбю "
+        for char in self.password.data:
+            if char in excluded_chars:
+                raise ValidationError(
+                    f"Character {char} is not allowed in password.")
+
+
     def validate_phone(self, phone):
         try:
             p = phonenumbers.parse(phone.data)
@@ -298,11 +304,11 @@ class RegistrationForm(FlaskForm):
         except (phonenumbers.phonenumberutil.NumberParseException, ValueError):
             raise ValidationError('Invalid phone number')
 
-        
 
 
 
-                
+
+
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -316,7 +322,7 @@ def register():
     return render_template('registration.html', form=form)
 
 
- 
+
 
 
 
@@ -325,11 +331,11 @@ def contacts():
     return render_template ("contatcts.html")
 
 @app.route('/price')
-def price(): 
+def price():
     city = Citys.query.all()
     return render_template("price.html",city = city)
 
-@app.route('/dashboard',methods = ['GET', 'POST'])   
+@app.route('/dashboard',methods = ['GET', 'POST'])
 @login_required
 def dashboard():
     form = UserUpdateForm()
@@ -349,18 +355,18 @@ def dashboard():
     else:
         return render_template("dashboard.html",form = form,usersupdate = usersupdate,id=id)
 
-	
-    
-	
-	
-	
+
+
+
+
+
 @app.route('/delete/<int:id>',methods = ['GET', 'POST'])
 @login_required
 def delete(id):
     if id == current_user.id_users:
         usersdelete = Users.query.get_or_404(id)
-      
-        
+
+
         try:
             db.session.delete(usersdelete)
             db.session.commit()
@@ -370,8 +376,8 @@ def delete(id):
             return redirect(url_for('index'))
     else:
         flash("Помилка!")
-        return redirect(url_for('dashboard'))	
-        
+        return redirect(url_for('dashboard'))
+
 @app.route('/orders/edit/<int:id>',methods = ['GET', 'POST'])
 def edit_order(id):
     order  = Orders.query.get_or_404(id)
@@ -379,13 +385,13 @@ def edit_order(id):
     form.city_sender.choices =  [(s.id,s.city) for s in Citys.query]
     if request.method == 'POST':
     	order.cargo = form.cargo.data
-    	
-    	
+
+
     	order.weight = form.weight.data
-   
+
     	order.street_sender = form.street_sender.data
     	order.house_number = form.house_number.data
-    	order.date_senders = form.date_senders.data 
+    	order.date_senders = form.date_senders.data
     	db.session.add(order)
     	db.session.commit()
     	flash('Update Data!')
@@ -396,61 +402,61 @@ def edit_order(id):
     form.house_number.data = order.house_number
     form.date_senders.data = order.date_senders
     return render_template('edit_orders.html',form = form)
-	
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-	    
-		
-		
-		
-		
-		
-	
-		
-	
-
-       
-      
-     
-       
-            
-       
-       	
-       
-   
-        
-         	
-         	
-	
-         
-    
-
-    	
-    
-        
-          	    
-          	    
-          
 
 
-    	
-    	    
-    
-    		
-    
-         
-         
-       
-    	
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

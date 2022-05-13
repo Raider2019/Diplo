@@ -57,21 +57,22 @@
   <li class="nav-item">
           <a class="nav-link" href="{{ url_for('dashboard')}}"> Профіль</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('logout')}}">Вийти</a>
-        </li>
            <li class="nav-item">
           <a class="nav-link" href="{{ url_for('add_orders')}}">Оформити замовлення </a>
-          
+
         </li>
            <li class="nav-item">
           <a class="nav-link" href="{{ url_for('orders')}}">Ваші замовлення</a>
         </li>
+                <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout')}}">Вийти</a>
+        </li>
+
   </ul>
 </div>
-      
+
         {% endif %}
-  
+
     </div>
   </nav>
 
